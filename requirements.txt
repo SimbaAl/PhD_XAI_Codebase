@@ -1,0 +1,133 @@
+# Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Scientific Computing
+numpy>=1.24.0
+scipy>=1.10.0
+pandas>=2.0.0
+
+# Data Loading and Processing
+h5py>=3.8.0
+mat73>=0.60
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Machine Learning
+scikit-learn>=1.2.0
+
+# Testing
+pytest>=7.3.1
+pytest-cov>=4.1.0
+
+# Development Tools
+ipython>=8.12.0
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# Code Quality
+black>=23.3.0
+flake8>=6.0.0
+mypy>=1.3.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=1.2.0
+
+# Project Management
+setuptools>=67.7.0
+wheel>=0.40.0
+```
+
+This requirements file:
+
+1. Core ML/DL libraries:
+   - PyTorch for deep learning
+   - NumPy and SciPy for scientific computing
+   - Pandas for data manipulation
+
+2. Data handling:
+   - h5py for HDF5 file format
+   - mat73 for MATLAB file support
+
+3. Visualization:
+   - Matplotlib for plotting
+   - Seaborn for statistical visualizations
+
+4. ML utilities:
+   - scikit-learn for metrics and utilities
+
+5. Development and testing:
+   - pytest for testing
+   - IPython and Jupyter for interactive development
+
+6. Code quality:
+   - black for code formatting
+   - flake8 for linting
+   - mypy for type checking
+
+7. Documentation:
+   - Sphinx for generating documentation
+
+You can install these requirements using:
+```bash
+pip install -r requirements.txt
+```
+
+Also, you might want to update your `setup.py` to include these dependencies:
+
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name="grace",
+    version="0.1",
+    packages=find_packages(),
+    install_requires=[
+        'torch>=2.0.0',
+        'numpy>=1.24.0',
+        'scipy>=1.10.0',
+        'h5py>=3.8.0',
+        'matplotlib>=3.7.0',
+        'seaborn>=0.12.0',
+        'scikit-learn>=1.2.0',
+        'pandas>=2.0.0',
+        'mat73>=0.60'
+    ],
+    extras_require={
+        'dev': [
+            'pytest>=7.3.1',
+            'pytest-cov>=4.1.0',
+            'black>=23.3.0',
+            'flake8>=6.0.0',
+            'mypy>=1.3.0',
+            'sphinx>=7.0.0',
+            'sphinx-rtd-theme>=1.2.0'
+        ]
+    },
+    author="Simbarashe Aldrin Ngorima",
+    author_email="aldringorima@gmail.com",
+    description="Layer Relevance Propagation-based XAI Scheme for Channel Estimation",
+    long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
+    url="[repository-url]",
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires='>=3.11',
+)
+```
+
+This setup.py:
+1. Lists core dependencies in `install_requires`
+2. Places development tools in `extras_require['dev']`
+3. Includes project metadata
+4. Specifies Python version requirement
+
+To install the package with development dependencies:
+```bash
+pip install -e ".[dev]"

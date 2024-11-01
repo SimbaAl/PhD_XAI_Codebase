@@ -1,0 +1,184 @@
+# Data directories
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Results and outputs
+results/*
+!results/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+```
+
+2. Create empty `.gitkeep` files to maintain directory structure:
+```bash
+mkdir -p data/raw data/processed results
+touch data/raw/.gitkeep data/processed/.gitkeep results/.gitkeep
+```
+
+3. Initialize Git repository and setup GitHub:
+```bash
+# Initialize Git repository
+git init
+
+# Add files
+git add .
+
+# Initial commit
+git commit -m "Initial commit: Project structure and core implementation"
+```
+
+4. Create a GitHub repository:
+1. Go to github.com
+2. Click "New repository"
+3. Name it "PhD_Codebase"
+4. Don't initialize with README (we already have one)
+5. Add MIT License
+
+5. Link and push to GitHub:
+```bash
+git remote add origin https://github.com/SimbaAl/PhD_Codebase.git
+git branch -M main
+git push -u origin main
+```
+
+6. Add a note about data in README.md:
+
+```markdown
+## Dataset
+
+Due to size limitations, the dataset is not included in this repository. To use this codebase:
+
+1. Request the dataset by contacting: aldringorima@gmail.com
+2. Once received, place the data files in the following structure:
+
+```
+data/
+├── raw/               # Raw dataset files
+│   ├── High_VTV_SDWW_16QAM_TRFI_DNN_training_dataset_40.mat
+│   ├── High_VTV_SDWW_16QAM_TRFI_DNN_testing_dataset_0.mat
+│   └── ...
+└── processed/         # Will store processed datasets
+```
+
+For reference, the expected dataset includes:
+- Training data: High_VTV_SDWW_16QAM_TRFI_DNN_training_dataset_40.mat
+- Testing data: High_VTV_SDWW_16QAM_TRFI_DNN_testing_dataset_[0-40].mat
+```
+
+7. Optional: Add GitHub-specific files:
+
+Create `.github/ISSUE_TEMPLATE/bug_report.md`:
+```markdown
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: bug
+assignees: ''
+
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Run command '....'
+3. See error
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**System Information:**
+ - OS: [e.g. Ubuntu 20.04]
+ - Python Version: [e.g. 3.11]
+ - Package Version: [e.g. 0.1.0]
+
+**Additional context**
+Add any other context about the problem here.
+```
+
+Create `.github/PULL_REQUEST_TEMPLATE.md`:
+```markdown
+## Description
+Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
+
+## Type of change
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Documentation update
+
+## Checklist:
+- [ ] My code follows the style guidelines of this project
+- [ ] I have performed a self-review of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+```
+
+8. Good practices for ongoing development:
+```bash
+# Create a new feature branch
+git checkout -b feature/new-feature
+
+# Make changes and commit regularly
+git add <changed-files>
+git commit -m "descriptive message"
+
+# Push changes
+git push origin feature/new-feature
+
+# When ready, create a Pull Request on GitHub
