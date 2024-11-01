@@ -1,4 +1,4 @@
-# GRACE: Layer Relevance Propagation-based XAI Scheme for Channel Estimation
+# Layer Relevance Propagation-based XAI Scheme for Channel Estimation
 
 GRACE (Gradient-based Relevance Analysis for Channel Estimation) is a Python package that implements Layer-wise Relevance Propagation (LRP) to analyze, explain, and filter neural network inputs based on their contribution to model performance in channel estimation tasks.
 
