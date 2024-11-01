@@ -42,7 +42,7 @@ PhD_Codebase/
 1. Clone the repository:
 ```bash
 git clone https://github.com/SimbaAl/PhD_XAI_Codebase.git
-cd grace-channel-estimation
+cd PhD_XAI_Codebase
 ```
 
 2. Create and activate a Conda environment (recommended):
