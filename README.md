@@ -41,7 +41,7 @@ PhD_Codebase/
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
+git clone https://github.com/SimbaAl/PhD_XAI_Codebase.git
 cd grace-channel-estimation
 ```
 
