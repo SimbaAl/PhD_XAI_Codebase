@@ -91,29 +91,32 @@ class FeatureCategorizer:
             scores = (scores - scores.min()) / (scores.max() - scores.min())
             scores = 1 - scores  # Complement to match paper's representation
 
-        # Create histogram bins
-        bins = np.arange(0, 1.1, 0.1)
+        # Create histogram bins from 0 to 1
+        bins = np.array([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])  # Fixed bins
         hist, _ = np.histogram(scores, bins=bins)
 
         plt.figure(figsize=(12, 8))
-        bar_width = 0.08
-        x = bins[:-1]
 
         # Create bar plot
-        plt.bar(x, hist, width=bar_width, alpha=0.7,
-                label='TRFI-MLP Method', align='edge')
+        bars = plt.bar(bins[:-1], hist, width=0.2, align='edge',
+                       alpha=0.7, color='skyblue', label='Proposed method')
 
-        # Add value labels
-        for i, v in enumerate(hist):
-            if v > 0:
-                plt.text(x[i] + bar_width / 2, v, str(int(v)),
+        # Add value labels on top of each bar
+        for bar in bars:
+            height = bar.get_height()
+            if height > 0:  # Only show label if there are features in the bin
+                plt.text(bar.get_x() + bar.get_width() / 2, height,
+                         f'{int(height)}',
                          ha='center', va='bottom')
 
-        plt.xlabel('Normalised LRP scores')
-        plt.ylabel('Subcarriers')
+        plt.xlabel('Relevance Score')
+        plt.ylabel('Number of subcarriers')
         plt.title(f'Relevance Score Distribution - {channel_type}')
         plt.grid(True, alpha=0.3)
         plt.legend()
+
+        # Set x-axis ticks
+        plt.xticks(bins)
 
         plt.savefig(f'{save_path}_relevance_distribution.png',
                     bbox_inches='tight', dpi=300)

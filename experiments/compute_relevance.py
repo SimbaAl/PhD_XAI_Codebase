@@ -146,6 +146,25 @@ def plot_relevance_distribution(
     plt.close()
 
 
+def get_save_directory(args: argparse.Namespace) -> Dict[str, Path]:
+    """Get directories for saving data."""
+    # Base processed directory for most outputs
+    processed_dir = PathManager.DATA_DIR / "processed"
+    base_save_path = processed_dir / f"{args.mobility}_{args.channel_model}_{args.modulation}_{args.scheme}"
+
+    # Special directory for relevance scores
+    relevance_scores_dir = processed_dir / "relevance_scores"
+
+    # Create directories
+    base_save_path.mkdir(parents=True, exist_ok=True)
+    relevance_scores_dir.mkdir(parents=True, exist_ok=True)
+
+    return {
+        'base': base_save_path,
+        'relevance_scores': relevance_scores_dir
+    }
+
+
 def main():
     """Main function for computing relevance scores."""
     args = parse_args()
@@ -156,13 +175,6 @@ def main():
 
     # Create directories
     PathManager.create_required_directories()
-
-    def get_save_directory(args: argparse.Namespace) -> Path:
-        """Get directory for saving processed data."""
-        processed_dir = PathManager.DATA_DIR / "processed"
-        save_path = processed_dir / f"{args.mobility}_{args.channel_model}_{args.modulation}_{args.scheme}"
-        save_path.mkdir(parents=True, exist_ok=True)
-        return save_path
 
     try:
         # Load model
@@ -212,25 +224,31 @@ def main():
 
         # Save results
         print("\nSaving results...")
-        save_path = get_save_directory(args)
+        # Get save directories
+        save_dirs = get_save_directory(args)
 
-        np.save(save_path / f"relevance_scores_{args.training_snr}.npy",
+        # Save relevance scores in relevance_scores directory
+        relevance_filename = f"{args.mobility}_{args.channel_model}_{args.modulation}_{args.scheme}_relevance_scores.npy"
+        np.save(save_dirs['relevance_scores'] / relevance_filename,
                 results['relevance_scores'])
-        np.save(save_path / f"model_predictions_{args.training_snr}.npy",
+
+        # Save other results in base directory
+        np.save(save_dirs['base'] / f"model_predictions_{args.training_snr}.npy",
                 results['model_predictions'])
-        np.save(save_path / f"original_inputs_{args.training_snr}.npy",
+        np.save(save_dirs['base'] / f"original_inputs_{args.training_snr}.npy",
                 results['original_inputs'])
 
         # Create visualization
         channel_type = 'HFS' if args.channel_model == 'VTV_SDWW' else 'LFS'
         plot_relevance_distribution(
             results['relevance_scores'],
-            save_path,
+            save_dirs['base'],
             channel_type
         )
 
         print("\nRelevance computation completed successfully!")
-        print(f"Results saved to: {save_path}")
+        print(f"Relevance scores saved to: {save_dirs['relevance_scores']}")
+        print(f"Other results saved to: {save_dirs['base']}")
 
     except Exception as e:
         print(f"\nError occurred: {e}")

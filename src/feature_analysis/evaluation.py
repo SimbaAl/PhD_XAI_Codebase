@@ -46,28 +46,8 @@ class FeatureEvaluator:
         self.model.to(self.device)
         self.model.eval()
 
-    def _convert_to_serializable(self, obj: Any) -> Any:
-        """Convert numpy/torch types to Python native types for JSON serialization."""
-        if isinstance(obj, (np.integer, np.int32, np.int64)):
-            return int(obj)
-        elif isinstance(obj, (np.floating, np.float32, np.float64)):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        elif isinstance(obj, torch.Tensor):
-            return obj.cpu().numpy().tolist()
-        elif isinstance(obj, dict):
-            return {key: self._convert_to_serializable(value) for key, value in obj.items()}
-        elif isinstance(obj, list):
-            return [self._convert_to_serializable(item) for item in obj]
-        return obj
-
     def _setup_directories(self, base_path: Path) -> Dict[str, Path]:
-        """
-        Create directory structure for outputs.
-
-        Returns dictionary of paths for different output types.
-        """
+        """Create directory structure for outputs."""
         dirs = {
             'base': base_path,
             'visualizations': base_path / 'visualizations',
@@ -128,8 +108,8 @@ class FeatureEvaluator:
             outputs, mse, rmse = self.evaluate_model(masked_input, Y_test)
 
             results[category] = EvaluationResult(
-                mse=float(mse),  # Convert to native Python float
-                rmse=float(rmse),  # Convert to native Python float
+                mse=float(mse),
+                rmse=float(rmse),
                 predictions=outputs.cpu().numpy()
             )
 
@@ -162,7 +142,7 @@ class FeatureEvaluator:
                     if start <= snr <= end
                 ]
                 mse_values = [
-                    float(results[snr][cat].mse)  # Convert to native Python float
+                    float(results[snr][cat].mse)
                     for snr in region_snrs
                 ]
 
@@ -176,11 +156,11 @@ class FeatureEvaluator:
                 # Save individual metric files
                 metric_file = dirs['metrics']['stability'] / f"{cat}_{region}_metrics.json"
                 with open(metric_file, 'w') as f:
-                    json.dump(self._convert_to_serializable({
+                    json.dump({
                         'mean_mse': mean_mse,
                         'std_mse': std_mse,
                         'cv': cv
-                    }), f, indent=4)
+                    }, f, indent=4)
 
         return stability_metrics
 
@@ -207,11 +187,11 @@ class FeatureEvaluator:
         # Save performance metrics
         performance_file = dirs['metrics']['performance'] / 'snr_performance.json'
         with open(performance_file, 'w') as f:
-            json.dump(self._convert_to_serializable({
+            json.dump({
                 'mse': mse_data,
                 'rmse': rmse_data,
                 'snr_values': list(snr_values)
-            }), f, indent=4)
+            }, f, indent=4)
 
         # Plot MSE trends
         plt.figure(figsize=(12, 8))
@@ -263,7 +243,7 @@ class FeatureEvaluator:
         # Save relative performance metrics
         relative_file = dirs['metrics']['relative'] / 'relative_performance.json'
         with open(relative_file, 'w') as f:
-            json.dump(self._convert_to_serializable(relative_performance), f, indent=4)
+            json.dump(relative_performance, f, indent=4)
 
         # Create heatmap
         performance_matrix = np.zeros((len(categories), len(snr_values)))
@@ -299,8 +279,9 @@ class FeatureEvaluator:
     ) -> None:
         """Generate a comprehensive summary report."""
         dirs = self._setup_directories(output_dir)
+        report_path = dirs['reports'] / 'summary_report.txt'
 
-        with open(dirs['reports'] / 'summary_report.txt', 'w') as f:
+        with open(report_path, 'w') as f:
             f.write("Performance Analysis Summary Report\n")
             f.write("================================\n\n")
 
@@ -319,16 +300,6 @@ class FeatureEvaluator:
             f.write("--------------------------\n")
             for rank, (cat, mse) in enumerate(ranked_categories, 1):
                 f.write(f"{rank}. {cat.upper()}: Average MSE = {mse:.6f}\n")
-
-            # Save rankings as JSON
-            rankings_file = dirs['metrics']['performance'] / 'rankings.json'
-            with open(rankings_file, 'w') as rf:
-                json.dump(self._convert_to_serializable({
-                    'rankings': [
-                        {'category': cat, 'avg_mse': mse}
-                        for cat, mse in ranked_categories
-                    ]
-                }), rf, indent=4)
 
             # Performance Improvement Analysis
             f.write("\n2. Performance Improvement Analysis\n")
@@ -354,7 +325,7 @@ class FeatureEvaluator:
             # Save improvement metrics
             improvement_file = dirs['metrics']['performance'] / 'improvement_metrics.json'
             with open(improvement_file, 'w') as imf:
-                json.dump(self._convert_to_serializable(improvement_metrics), imf, indent=4)
+                json.dump(improvement_metrics, imf, indent=4)
 
             # Stability Analysis Summary
             f.write("\n3. Stability Analysis\n")
@@ -378,87 +349,14 @@ class FeatureEvaluator:
                         'std_mse': float(metrics.std_mse),
                         'cv': float(cv)
                     }
-                    f.write("\n")
+                f.write("\n")
 
-                    # Save stability summary
-                stability_summary_file = dirs['metrics']['stability'] / 'stability_summary.json'
-                with open(stability_summary_file, 'w') as ssf:
-                    json.dump(self._convert_to_serializable(stability_summary), ssf, indent=4)
+            # Save stability summary
+            stability_summary_file = dirs['metrics']['stability'] / 'stability_summary.json'
+            with open(stability_summary_file, 'w') as ssf:
+                json.dump(stability_summary, ssf, indent=4)
 
-                # Relative Performance Analysis
-                f.write("\n4. Relative Performance Analysis\n")
-                f.write("------------------------------\n")
-
-                avg_relative_performance = {}
-                for cat in categories:
-                    avg_rel_perf = float(np.mean([
-                        float(relative_performance[snr][cat])
-                        for snr in snr_values
-                    ]))
-
-                    avg_relative_performance[cat] = avg_rel_perf
-
-                    f.write(f"\n{cat.upper()}:")
-                    f.write(f"\n  Average Relative Performance: {avg_rel_perf:.2f}%")
-
-                    # Per-SNR breakdown
-                    f.write("\n  SNR Breakdown:")
-                    for snr in snr_values:
-                        rel_perf = float(relative_performance[snr][cat])
-                        f.write(f"\n    {snr}dB: {rel_perf:.2f}%")
-                    f.write("\n")
-
-                # Save average relative performance metrics
-                rel_perf_file = dirs['metrics']['relative'] / 'average_relative_performance.json'
-                with open(rel_perf_file, 'w') as rpf:
-                    json.dump(self._convert_to_serializable({
-                        'average_relative_performance': avg_relative_performance,
-                        'per_snr_breakdown': relative_performance
-                    }), rpf, indent=4)
-
-                # Overall Conclusions
-                f.write("\n5. Overall Conclusions\n")
-                f.write("--------------------\n")
-
-                # Find best performing category
-                best_category = min(avg_performance.items(), key=lambda x: x[1])[0]
-                best_improvement = improvement_metrics[best_category]['improvement_percentage']
-
-                # Find most stable category (lowest average CV)
-                avg_cv = {
-                    cat: float(np.mean([
-                        float(stability_metrics[cat][region].cv)
-                        for region in ['low', 'medium', 'high']
-                    ]))
-                    for cat in categories
-                }
-                most_stable_category = min(avg_cv.items(), key=lambda x: x[1])[0]
-
-                f.write("\nKey Findings:\n")
-                f.write(f"1. Best Overall Performance: {best_category.upper()}\n")
-                f.write(f"   - Average MSE: {avg_performance[best_category]:.6f}\n")
-                f.write(f"   - Performance Improvement: {best_improvement:.1f}%\n")
-                f.write(f"\n2. Most Stable Performance: {most_stable_category.upper()}\n")
-                f.write(f"   - Average CV: {avg_cv[most_stable_category]:.2f}%\n")
-
-                # Save conclusions
-                conclusions_file = dirs['reports'] / 'conclusions.json'
-                with open(conclusions_file, 'w') as cf:
-                    json.dump(self._convert_to_serializable({
-                        'best_performing_category': {
-                            'category': best_category,
-                            'average_mse': avg_performance[best_category],
-                            'improvement': best_improvement
-                        },
-                        'most_stable_category': {
-                            'category': most_stable_category,
-                            'average_cv': avg_cv[most_stable_category]
-                        },
-                        'category_stability_metrics': avg_cv,
-                        'category_performance_metrics': avg_performance
-                    }), cf, indent=4)
-
-                f.write("\nAnalysis files have been saved to the following directories:")
-                f.write(f"\n- Visualizations: {dirs['visualizations']}")
-                f.write(f"\n- Metrics: {dirs['metrics']}")
-                f.write(f"\n- Reports: {dirs['reports']}\n")
+            f.write("\nAnalysis files have been saved to the following directories:")
+            f.write(f"\n- Visualizations: {dirs['visualizations']}")
+            f.write(f"\n- Metrics: {dirs['metrics']}")
+            f.write(f"\n- Reports: {dirs['reports']}\n")

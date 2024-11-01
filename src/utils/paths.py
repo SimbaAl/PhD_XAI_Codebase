@@ -54,6 +54,7 @@ class PathManager:
     ) -> Path:
         """Get path for testing dataset."""
         filename = f"{mobility}_{channel_model}_{modulation}_{scheme}_DNN_testing_dataset_{snr}.mat"
+        # Changed from processed/training_data to raw
         return cls.DATA_DIR / "raw" / filename
 
     @classmethod
